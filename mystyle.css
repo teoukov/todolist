@@ -1,0 +1,100 @@
+*{
+	background: lightblue;
+	box-sizing: border-box;
+}
+
+h1{
+	color: #DC143C;
+}
+
+ul {
+    margin: 0 0 0 0;
+    padding: 0;
+}
+ul li{
+	cursor: pointer;
+	padding: 12px 8px 15px 40px;
+	font-size: 24px;
+	color: #FAEBD7;
+	background-color: #BDB76B;
+	list-style-type: none;
+	width: 100%;
+	transition: 0.5s;
+}
+ul li:hover{
+	color: #DC143C;
+	background-color: #A9A9A9;
+	text-decoration: line-through;
+}
+
+ul li.checked{
+	text-decoration: line-through;
+	background: #888;
+}
+
+/* Add a "checked" mark when clicked on */
+ul li.checked:before {
+    content: '';
+	position: fixed;
+    border-color: red;
+    border-style: solid;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    height: 22px;
+    width: 12px;
+	left: 20px;
+}
+
+input{
+	border: 5;
+	border-color: #8A2BE2;
+	border-style: solid;
+	width: 100%;
+    padding: 10px;
+    font-size: 16px;
+	text-align: center;
+	background-color: #FF7F50;
+	color: #7FFF00;
+}
+
+p {
+	margin : 20;
+	float : left;
+	color: #7FFF00;
+	font-size: 20;
+	background-color: #FF7F50;
+}
+
+.header{
+	background-color: #FF7F50;
+}
+
+.addBtn{
+	padding: 10px;
+    width: 5%;
+    background: green;
+    color: black;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+	position: fixed;
+	right: 47%;
+	top: 14%;
+}
+
+.addBtn:hover{
+	background-color: #8B0000;
+}
+
+.close{
+	float: right;
+	cursor: pointer;
+	padding: 18px 30px 10px 20px;
+	text-align: center;
+	background-color: #8B0000;
+}
+
+.close:hover{
+	background-color: #A52A2A;
+	color: red;
+}
