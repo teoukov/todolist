@@ -15,7 +15,7 @@ class TODOView {
 	static render() {
 		var li;
 		var t;
-		
+
 		for(i=0; i < todoItems.length; i++){
 			li = document.createElement("li");
 
@@ -30,7 +30,11 @@ class TODOView {
 			
 			document.getElementById("myUL").appendChild(li);
 		}
+		if(!todoItems){
+			actCount = 0
+		}
 		actCount = todoItems.length;
+
 	}
 }
 //classes_______________________
@@ -46,7 +50,6 @@ function sendData() {
 }
 
 function getData(){
-	var strArray = [];
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "/todoItems", true);
 	
@@ -57,7 +60,13 @@ function getData(){
 			if((status >= 200 && status< 300) || (status === 304)){
 				todoItems = [];
 				todoItems = JSON.parse(xhr.responseText);
-				TODOView.render();
+				
+				if(!todoItems){
+					actCount = 0;
+					todoItems = [];
+				}else{
+				  TODOView.render();
+				}
 			}
 		}
 
@@ -82,7 +91,7 @@ function addButton(lii){
 				todoItems.splice(temp, 1);
 			}
 		}
-		
+		actCount--;
 		this.parentNode.parentNode.removeChild(lii);
 		sendData();
 	});
@@ -168,14 +177,11 @@ function makeEvents(){
 //actions
 window.addEventListener("load", function(){
 	getData();
-	document.getElementById("addBtn").addEventListener("click", addTask);
-	document.getElementById("addBtn").addEventListener("mouseover", makeSpeakFunc("Keep this in mind"));
-	document.getElementById("addBtn").addEventListener("mouseout", makeSpeakFunc(""));
 	document.getElementById("myInput").addEventListener("mouseover", makeSpeakFunc("What are you willing to do?.."));
 	document.getElementById("myInput").addEventListener("mouseout", makeSpeakFunc(""));
 	document.getElementById("myInput").addEventListener("keyup", function(event){
 		event.preventDefault();
-		if(event.keyCode === 13){document.getElementById("addBtn").click();}
+		if(event.keyCode === 13){addTask();}
 		makeEvents();
 
 	});

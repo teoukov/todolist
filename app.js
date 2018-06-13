@@ -4,19 +4,29 @@ var url = require('url');
 var fs = require('fs');
 var qs = require('querystring');
 var path = require('path');
+var redis = require('redis');
 
 var fFuncs = require('./fileFuncs.js');
 
-//variables________
-var todoItems;
+//basic___variables________
+var todoItems = [];
+var i, j;
 //end__variables___
+
+let client = redis.createClient();
+
+client.on('connect', function(){
+	
+	getDataFromRedis();
+	console.log('Connected to redis');
+});
 
 // Create a function to handle every HTTP request
 function handler(req, res){
 	
 	if (req.method == 'POST') {
         var body = '';
-
+		
 		req.on('error', function () {
 			console.error();
 		}).on('data', function(data){
@@ -26,27 +36,18 @@ function handler(req, res){
 			todoItems = [];
 			
 			todoItems = JSON.parse(body);
-			console.log(todoItems);
 			
-			
-			fs.writeFile("j.json", JSON.stringify(todoItems), function (err) {
-				if (err) {
-					console.log(err);
-				} else {
-					console.log("wrote file");
-				}
-			});	
+			storeDataInRedis();
 		});
 	}else if(req.method === 'GET'&& req.url == '/todoItems'){
 		res.writeHead(200, { 'Content-Type': "text/plain" });
-		getItems();
+		
         res.end(JSON.stringify(todoItems), 'utf-8');
 	}else if (req.method === 'GET'){
-		getItems();
 		getPage(req, res);
 	}
 	
-};
+}
 
 extensionToContentType = {
 		'.html': 'text/html',
@@ -58,15 +59,22 @@ extensionToContentType = {
 		'.wav': 'audio/wav'
 }
 
-function getItems(){
-	fs.readFile("j.json", 'utf8', function (err, content) {
-        if(err){
-			console.error(err);
-		}else{
-			todoItems = [];
-			todoItems = JSON.parse(content);
-		}
-    });
+
+
+function storeDataInRedis(){
+	var stringData = JSON.stringify(todoItems);
+
+	client.set('user', stringData, function(err, reply){
+		console.log("Data stored->");
+		console.log(todoItems[todoItems.length - 1]);
+	});
+}
+
+function getDataFromRedis(){
+	client.get('user', function(err, reply){
+		todoItems = JSON.parse(reply);
+		console.log(todoItems);
+	});
 }
 
 function getPage(req, res){
@@ -82,7 +90,6 @@ function getPage(req, res){
         if (error) {
             if(error.code == 'ENOENT'){
                 fs.readFile('./404.html', function(error, content) {
-					
                     res.writeHead(200, { 'Content-Type': contentType });
                     res.end(content);
                 });
@@ -100,6 +107,16 @@ function getPage(req, res){
     });
 }
 
+//unused functions
+function getDataFromFile(){
+	fs.readFile("j.json", 'utf8', function (err, content) {
+        if(err){
+			console.error(err);
+		}else{
+			todoItems = JSON.parse(content);
+		}
+    });
+}
 // Create a server that invokes the `handler` function upon receiving a request
 http.createServer(handler).listen(8000,function(err){
   if(err){
