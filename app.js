@@ -10,7 +10,7 @@ var fFuncs = require('./fileFuncs.js');
 
 //basic___variables________
 var todoItems = [];
-var i, j;
+var i, j; 
 //end__variables___
 
 let client = redis.createClient();
@@ -38,7 +38,10 @@ function handler(req, res){
 			todoItems = JSON.parse(body);
 			
 			storeDataInRedis();
+
 		});
+		
+		
 	}else if(req.method === 'GET'&& req.url == '/todoItems'){
 		res.writeHead(200, { 'Content-Type': "text/plain" });
 		
@@ -59,19 +62,20 @@ extensionToContentType = {
 		'.wav': 'audio/wav'
 }
 
-
-
 function storeDataInRedis(){
 	var stringData = JSON.stringify(todoItems);
 
 	client.set('user', stringData, function(err, reply){
 		console.log("Data stored->");
-		console.log(todoItems[todoItems.length - 1]);
+		console.log(todoItems);
 	});
 }
 
 function getDataFromRedis(){
 	client.get('user', function(err, reply){
+		if(err){
+			console.log(err);
+		}
 		todoItems = JSON.parse(reply);
 		console.log(todoItems);
 	});

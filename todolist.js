@@ -2,20 +2,25 @@
 var i, j;
 var actCount;
 
-var movingTask;
-var movingClass;
-var restingTxt;
+var movingPos;
+var restingPos;
 
-var todoItems;
-//____end__variables____
+var todoItems = [];
 
+//classes_______________________
 class TODOView {
 
     // model
 	static render() {
 		var li;
 		var t;
-
+		
+		document.getElementById("myUL").remove();
+		
+		var ul = document.createElement("ul");
+		ul.setAttribute("id", "myUL");
+		document.body.appendChild(ul);
+		
 		for(i=0; i < todoItems.length; i++){
 			li = document.createElement("li");
 
@@ -30,24 +35,13 @@ class TODOView {
 			
 			document.getElementById("myUL").appendChild(li);
 		}
-		if(!todoItems){
-			actCount = 0
-		}
-		actCount = todoItems.length;
 
+		actCount = todoItems.length;
+		
+		setLiEvents();
 	}
 }
-//classes_______________________
-
-function sendData() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '/', true);
-	  
-	var whole = "";
-	whole = JSON.stringify(todoItems);
-	  
-	xhr.send(whole);
-}
+//END_________CLASSES_________________________________
 
 function getData(){
 	var xhr = new XMLHttpRequest();
@@ -65,33 +59,44 @@ function getData(){
 					actCount = 0;
 					todoItems = [];
 				}else{
-				  TODOView.render();
+					TODOView.render();
 				}
 			}
 		}
-
 	}
 	
 	xhr.send(null);
+}
+
+function sendData() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '/', true);
+	  
+	xhr.onreadystatechange = function(){
+	  if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200){
+		document.writeln("DONE!");
+	  }
+
+	}
+	
+	var whole = "";
+	whole = JSON.stringify(todoItems);
+	xhr.send(whole);
 }
 
 function addButton(lii){
 	var btn = document.createElement("BUTTON");
 	btn.className = "close";
 	btn.addEventListener("click", function(){
-		var temp;
+
 		for(i=0; i < todoItems.length; i++){
-			
 			if(todoItems[i].cont === lii.textContent){
-				temp=i;
-				while(i<todoItems.length){
-					todoItems[i].position -= 1;
-					i++;
-				}
-				todoItems.splice(temp, 1);
+				todoItems.splice(i, 1);
+				setPositions();
+				actCount--;
 			}
 		}
-		actCount--;
+		
 		this.parentNode.parentNode.removeChild(lii);
 		sendData();
 	});
@@ -113,22 +118,26 @@ function addTask(){
 	
 	if(inputVal === ''){
 		alert("You have to enter soemthing !");
-	}else if(actCount > 10){
+	}else if(actCount > 15){
 		alert("There are a lot of tasks there! You will be hyper exhausted");
+	}else if(checkExistence(inputVal) === true){
+		alert("There is a task with the same name !");
 	}else{
 		document.getElementById("myUL").appendChild(li);
+		
+		var btn = addButton(li);
+		li.appendChild(btn);
+	
+		todoItems.push(liData);
+		
+		setLiEvents();
 	}
 	document.getElementById("myInput").value = "";
-	
-	//making close button
-	var btn = addButton(li);
-	li.appendChild(btn);
-	
-	todoItems.push(liData);
 	
 	sendData();
 }
 
+//Basic____functions____________________
 function makeSpeakFunc(txt) {
 	return function() {
 		document.getElementById("aiText").innerHTML = txt;
@@ -137,40 +146,69 @@ function makeSpeakFunc(txt) {
 function makeSpeak(txt) {
 	document.getElementById("aiText").innerHTML = txt;
 }
-
-function dragover(e) {
-	e.preventDefault();
-}
-
 function sleep(delay) {
     var start = new Date().getTime();
     while (new Date().getTime() < start + delay);
 }
-
-function onDrop() {
-	return function(){
-		restingTxt = event.target.textContent;
-		event.target.textContent = movingTask.textContent;
-		movingTask.textContent = restingTxt;
-		
-		event.target.appendChild(addButton(event.target));
-		movingTask.appendChild(addButton(movingTask));
-		
-		movingClass = event.target.getAttribute("class");
-		event.target.setAttribute("class", movingTask.getAttribute("class"));
-		movingTask.setAttribute("class", movingClass);
-		
-		event.preventDefault();
-		sendData();
-	}	
+function checkExistence(text){
+	
+	for(i=0; i<todoItems.length; i++){
+		if(text === todoItems[i].cont){
+			return true;
+		}
+	}
+	return false;
+}
+function setPositions(){
+	for(i=0; i<todoItems.length; i++){
+		todoItems[i].position = i;
+	}
 }
 
-function makeEvents(){
+//____EVENT______FUNCTIONS_________________________________
+function dragstart(e){
+	
+	for(i=0; i < todoItems.length; i++){
+		if(event.target.textContent === todoItems[i].cont){
+			movingPos = todoItems[i].position;
+		}
+	}
+}
+function dragover() {
+	event.preventDefault();
+	
+	for(i=0; i < todoItems.length; i++){
+		if(event.target.textContent === todoItems[i].cont){
+			restingPos = todoItems[i].position;
+		}
+	}
+	
+}
+function onDrop() {
+	event.preventDefault();
+	
+	var tempObj = todoItems[restingPos];
+	
+	todoItems[restingPos] = todoItems[movingPos];
+	todoItems[movingPos] = tempObj;
+	
+	setPositions();
+	
+	var str = "";
+	str = str.concat("resting: ", restingPos, " | moving: ", movingPos);
+	makeSpeak(str);
+	
+	sendData();
+	getData();
+}
+
+function setLiEvents(){
 	var lis = document.getElementById("myUL").getElementsByTagName("li");
-	for(i=0; i < lis.length; i+=1){
-		lis[i].setAttribute("draggable", "true");
-		lis[i].addEventListener("dragover", dragover);
-		lis[i].addEventListener("drop", onDrop());
+	for(i=0; i < todoItems.length; i++){
+	  lis[i].setAttribute("draggable", "true");
+	  lis[i].addEventListener("dragstart", dragstart);
+	  lis[i].addEventListener("dragover", dragover);
+	  lis[i].addEventListener("drop", onDrop);
 	}
 }
 
@@ -182,8 +220,6 @@ window.addEventListener("load", function(){
 	document.getElementById("myInput").addEventListener("keyup", function(event){
 		event.preventDefault();
 		if(event.keyCode === 13){addTask();}
-		makeEvents();
-
 	});
 	
 	//checking handler
@@ -200,9 +236,8 @@ window.addEventListener("load", function(){
 					}
 				}
 				
-			}
+			}//Any task with the same text content will be checked
 			sendData();
-			sleep(200);
 		}
 	});
 	
