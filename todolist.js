@@ -194,10 +194,6 @@ function onDrop() {
 	
 	setPositions();
 	
-	var str = "";
-	str = str.concat("resting: ", restingPos, " | moving: ", movingPos);
-	makeSpeak(str);
-	
 	sendData();
 	getData();
 }
@@ -209,6 +205,19 @@ function setLiEvents(){
 	  lis[i].addEventListener("dragstart", dragstart);
 	  lis[i].addEventListener("dragover", dragover);
 	  lis[i].addEventListener("drop", onDrop);
+	  lis[i].addEventListener("click", function(ev){
+		ev.target.classList.toggle('checked');
+		for(i = 0; i < todoItems.length; i++){
+				if(ev.target.textContent === todoItems[i].cont){
+					if(todoItems[i].className === ""){
+						todoItems[i].className = "checked";
+					}else{
+						todoItems[i].className = "";
+					}
+				}
+		}
+		sendData();
+	  });
 	}
 }
 
@@ -220,25 +229,6 @@ window.addEventListener("load", function(){
 	document.getElementById("myInput").addEventListener("keyup", function(event){
 		event.preventDefault();
 		if(event.keyCode === 13){addTask();}
-	});
-	
-	//checking handler
-	var list = document.querySelector('ul');
-	list.addEventListener("click", function(ev) {
-		if (ev.target.tagName === 'LI') {
-			ev.target.classList.toggle('checked');
-			for(i = 0; i < todoItems.length; i++){
-				if(ev.target.textContent === todoItems[i].cont){
-					if(todoItems[i].className === ""){
-						todoItems[i].className = "checked";
-					}else{
-						todoItems[i].className = "";
-					}
-				}
-				
-			}//Any task with the same text content will be checked
-			sendData();
-		}
 	});
 	
 });
