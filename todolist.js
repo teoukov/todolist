@@ -71,13 +71,6 @@ function getData(){
 function sendData() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', '/', true);
-	  
-	xhr.onreadystatechange = function(){
-	  if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200){
-		document.writeln("DONE!");
-	  }
-
-	}
 	
 	var whole = "";
 	whole = JSON.stringify(todoItems);

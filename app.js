@@ -41,7 +41,7 @@ function handler(req, res){
 
 		});
 		
-		
+		res.end();
 	}else if(req.method === 'GET'&& req.url == '/todoItems'){
 		res.writeHead(200, { 'Content-Type': "text/plain" });
 		
