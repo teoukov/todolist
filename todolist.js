@@ -4,7 +4,7 @@ let restingI = 0;
 let todoItems = [];
 
 class Task {
-    constructor(text, className, i) {
+    constructor(text, className, i, checked) {
         this.text = text
         this.className = className
         this.i = i
@@ -22,7 +22,7 @@ function setTaskEvents() {
     }
 }
 
-function refreshUl() {
+function update() {
     let ul = document.getElementById("myUL")
     ul.innerHTML = '';
 
@@ -43,7 +43,7 @@ function addCloseButton(li) {
         for (i = 0; i < todoItems.length; i++) {
             if (todoItems[i].text === li.textContent) {
                 todoItems.splice(i, 1);
-                refreshUl();
+                update();
                 actCount--;
             }
         }
@@ -75,11 +75,11 @@ function addTask() {
         alert("There is a task with the same name !");
     } else {
         // Add task
-        let task = new Task(text, "", todoItems.length)
+        let task = new Task(text, "", todoItems.length, false)
         todoItems.push(task)
     }
     document.getElementById("myInput").value = "";
-    refreshUl()
+    update()
 }
 
 //Basic____functions____________________
@@ -127,7 +127,7 @@ class TaskEvents {
         let tempObj = todoItems[restingI];
         todoItems[restingI] = todoItems[movingI];
         todoItems[movingI] = tempObj;
-        refreshUl();
+        update();
     }
 
     static onClick(e) {
@@ -142,7 +142,7 @@ class TaskEvents {
             }
         }
 
-        refreshUl()
+        update()
     }
 }
 
